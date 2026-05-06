@@ -1,0 +1,153 @@
+# Production Ingestion System Requirements
+# Install with: pip install -r requirements.txt
+
+# ============================================================================
+# WEB SERVER (Required for backend_server.py)
+# ============================================================================
+
+# FastAPI Web Framework
+fastapi>=0.136.0           # Modern async web framework
+uvicorn[standard]>=0.46.0  # ASGI server
+
+# Request Handling
+python-multipart>=0.0.27   # Multipart form data support
+python-dotenv>=1.0.0      # Load .env into environment for local development
+
+# ============================================================================
+# CORE DEPENDENCIES (Required)
+# ============================================================================
+
+# PDF Processing
+PyPDF2>=3.0.0              # PDF text extraction
+pdfplumber>=0.10.0         # Alternative PDF parser (faster)
+
+# DOCX Processing
+python-docx>=0.8.11        # DOCX file parsing
+
+# XLSX Processing
+# openpyxl 3.10.0 does not exist on PyPI; pin to a valid modern release
+openpyxl>=3.1.0           # Excel file parsing
+
+# PDF Export
+reportlab>=4.0.0           # PDF generation for questionnaire exports
+
+# Schema & Validation
+pydantic>=2.0.0           # Data validation and schema enforcement
+dataclasses-json>=0.5.0   # JSON serialization for dataclasses
+
+# ============================================================================
+# OPTIONAL DEPENDENCIES (Recommended for Production)
+# ============================================================================
+
+# OCR for scanned PDFs
+pytesseract>=0.3.0        # Tesseract OCR interface
+Pillow>=10.0.0            # Image processing for OCR
+
+# Encoding Detection
+chardet>=5.0.0            # Auto-detect file encoding
+
+# Logging & Monitoring
+structlog>=23.0.0         # Structured logging
+python-json-logger>=2.0.0 # JSON logging formatter
+
+# Performance & Profiling
+memory-profiler>=0.60.0   # Memory usage analysis
+py-spy>=0.3.14            # Continuous profiling
+
+# Database
+psycopg2-binary>=2.9.0    # PostgreSQL adapter
+sqlalchemy>=2.0.0         # ORM (optional, for complex queries)
+
+# Async Processing
+celery>=5.2.0             # Task queue
+redis>=4.3.0              # For Celery broker
+
+# ============================================================================
+# TESTING & DEVELOPMENT
+# ============================================================================
+
+pytest>=7.0.0             # Testing framework
+pytest-cov>=4.0.0         # Code coverage
+pytest-mock>=3.10.0       # Mocking support
+hypothesis>=6.70.0        # Property-based testing
+
+# Code Quality
+black>=23.0.0             # Code formatting
+flake8>=6.0.0             # Linting
+mypy>=1.0.0               # Type checking
+isort>=5.12.0             # Import sorting
+
+# ============================================================================
+# OPTIONAL: Performance & Scalability
+# ============================================================================
+
+# For parallel processing
+aiofiles>=23.0.0          # Async file I/O
+aiohttp>=3.8.0            # Async HTTP
+
+# For distributed processing
+Dask>=2023.0.0            # Parallel computing
+ray>=2.0.0                # Distributed framework
+
+# For caching
+cachetools>=5.3.0         # Caching decorators
+
+# ============================================================================
+# OPTIONAL: Advanced OCR & NLP
+# ============================================================================
+
+# Better PDF extraction
+PyMuPDF>=1.23.0           # fitz - alternative PDF library
+
+# Question detection (ML-based)
+transformers>=4.30.0      # HuggingFace transformers (for BERT models)
+torch>=2.0.0              # PyTorch (required by transformers)
+
+# Content classification
+scikit-learn>=1.3.0       # ML algorithms
+
+# ============================================================================
+# LLM PROVIDERS (RAG System)
+# ============================================================================
+
+# Google Gemini
+google-genai>=1.0.0        # Google Gemini API client
+
+# Vector Search & Embeddings
+faiss-cpu>=1.7.0           # Facebook FAISS for vector indexing
+sentence-transformers>=2.2.0  # Sentence embeddings (all-MiniLM-L6-v2)
+
+# ============================================================================
+# DATABASE & CLOUD
+# ============================================================================
+
+# Supabase (PostgreSQL + Vector)
+supabase>=2.0.0            # Supabase Python client
+postgrest-py>=0.14.0       # PostgREST client
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# INSTALLATION GROUPS:
+#
+# Minimal (core only):
+#   pip install -r requirements.txt | grep -v "^#" | head -6
+#
+# Production recommended:
+#   pip install -r requirements.txt | grep -v "^#" | head -20
+#
+# Full development:
+#   pip install -r requirements.txt
+#
+# Mac/Linux with Tesseract:
+#   brew install tesseract  # macOS
+#   apt-get install tesseract-ocr  # Linux
+#   pip install -r requirements.txt
+#
+# Windows with Tesseract:
+#   Download from: https://github.com/UB-Mannheim/tesseract/wiki
+#   Set PYTESSERACT_PATH environment variable
+#   pip install -r requirements.txt
+
+# PYTHON VERSION: 3.9+

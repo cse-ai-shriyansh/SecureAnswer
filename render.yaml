@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: secureanswer-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker backend.app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: APP_ENV
+        value: "production"
+      - key: CORS_ORIGINS
+        value: "https://your-frontend.vercel.app"
+      - key: SUPABASE_URL
+        value: ""
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: ""
