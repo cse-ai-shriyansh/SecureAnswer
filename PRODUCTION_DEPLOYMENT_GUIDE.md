@@ -98,10 +98,11 @@ git push -u origin main
 ### 2.5 Set Up Google OAuth in Supabase
 
 1. Go to **Authentication** → **Providers**
-2. Enable **Google**:
+2. If you only see providers like **Clerk**, **WorkOS**, **Firebase**, or **Amazon**, look for the **Social login** / **External OAuth** section and scroll or search for **Google**.
+3. Enable **Google**:
    - Click **Google** toggle
    - Copy **Redirect URL** (e.g., `https://xxxx.supabase.co/auth/v1/callback`)
-3. Don't configure Client ID/Secret yet (we'll do that in Google Cloud next)
+4. Don't configure Client ID/Secret yet (we'll do that in Google Cloud next)
 
 ---
 
@@ -123,7 +124,7 @@ git push -u origin main
      ```
      http://localhost:3000
      http://localhost:3001
-     https://your-vercel-domain.vercel.app
+     https://your-c-domain.vercel.app
      https://xxxx.supabase.co/auth/v1/callback
      ```
 5. Copy **Client ID** (you'll need this)
@@ -131,7 +132,7 @@ git push -u origin main
 
 ### 3.2 Link Google OAuth to Supabase
 
-1. Go back to Supabase → **Authentication** → **Providers** → **Google**
+1. Go back to Supabase → **Authentication** → **Providers** → **Google** (or **Social login** if that is how your dashboard groups providers)
 2. Paste Google **Client ID** and **Client Secret**
 3. Click **Save**
 
