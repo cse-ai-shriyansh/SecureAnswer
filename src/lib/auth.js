@@ -30,7 +30,8 @@ export function getSession() {
   const token = getToken()
   if (!token || !token.includes('.')) return null
   try {
-    const [payload] = token.split('.')
+    const parts = token.split('.')
+    const payload = parts[1] || parts[0]
     const data = base64UrlDecode(payload)
     if (data.exp && Date.now() / 1000 >= data.exp) {
       clearToken()

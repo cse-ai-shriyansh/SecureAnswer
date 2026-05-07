@@ -7,4 +7,8 @@ export default defineConfig({
     port: 3000,
     host: true,
   },
+  build: {
+    // Increase chunk size warning limit to reduce noisy warnings for large bundles.
+    chunkSizeWarningLimit: 1000,
+  },
 })
