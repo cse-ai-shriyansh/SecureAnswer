@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import { login, loginWithGoogle, testLogin } from '../lib/auth'
+import { getSession } from '../lib/auth'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -16,13 +17,11 @@ export default function Login() {
   const enableDevLogin = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
   const enableTestLogin = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === 'true'
 
-  // Bypass login if auth is disabled
+  // If user already has a session, redirect to dashboard.
   useEffect(() => {
-    if (!googleClientId && !enableDevLogin) {
-      // Auth disabled - redirect to dashboard
-      nav('/', { replace: true })
-    }
-  }, [googleClientId, enableDevLogin, nav])
+    const session = getSession()
+    if (session) nav('/', { replace: true })
+  }, [nav])
 
   useEffect(() => {
     if (!googleClientId) return
