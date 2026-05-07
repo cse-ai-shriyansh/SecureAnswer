@@ -33,6 +33,11 @@ export function getSession() {
     const parts = token.split('.')
     const payload = parts[1] || parts[0]
     const data = base64UrlDecode(payload)
+    // Validate payload shape: expect an object with at least an expiry or user identifier
+    if (!data || typeof data !== 'object' || (!data.exp && !data.user && !data.sub && !data.email)) {
+      clearToken()
+      return null
+    }
     if (data.exp && Date.now() / 1000 >= data.exp) {
       clearToken()
       return null
