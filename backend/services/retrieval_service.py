@@ -2,6 +2,8 @@
 Retrieval Service - Vector search with FAISS (no Supabase vectors)
 """
 
+from __future__ import annotations
+
 import os
 import json
 import time
