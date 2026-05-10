@@ -14,13 +14,6 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-try:
-    import faiss
-    import numpy as np
-    from sentence_transformers import SentenceTransformer
-except ImportError:
-    raise ImportError("faiss-cpu and sentence-transformers are required")
-
 
 class RetrieverService:
     """
@@ -45,6 +38,10 @@ class RetrieverService:
         
         self.index_path = self.data_dir / "kb.faiss"
         self.metadata_db = self.data_dir / "kb_metadata.sqlite"
+
+        self.faiss = None
+        self.np = None
+        self.sentence_transformers = None
         
         # Initialize embedding model (local-first, deterministic fallback)
         self.embedding_model = None
@@ -139,17 +136,24 @@ class RetrieverService:
         
     def _load_faiss_index(self):
         """Load FAISS index from disk or create new one"""
+        if self.faiss is None:
+            import faiss as faiss_module
+
+            self.faiss = faiss_module
+
         if self.index_path.exists():
             print(f"Loading FAISS index from {self.index_path}")
-            self.index = faiss.read_index(str(self.index_path))
+            self.index = self.faiss.read_index(str(self.index_path))
         else:
             print(f"Creating new FAISS index")
-            self.index = faiss.IndexFlatIP(self.embedding_dim)
+            self.index = self.faiss.IndexFlatIP(self.embedding_dim)
 
     def _load_embedding_model(self, model_name: str):
         """Load embedding model using local cache only, then fallback to deterministic embeddings."""
         print(f"Loading embedding model (local-first): {model_name}")
         try:
+            from sentence_transformers import SentenceTransformer
+
             os.environ.setdefault("HF_HUB_OFFLINE", "1")
             self.embedding_model = SentenceTransformer(model_name)
             self.embedding_dim = self.embedding_model.get_sentence_embedding_dimension()
@@ -161,7 +165,12 @@ class RetrieverService:
 
     def _hash_encode(self, text: str) -> np.ndarray:
         """Deterministic local embedding fallback used when no transformer model is available."""
-        vector = np.zeros(self.embedding_dim, dtype=np.float32)
+        if self.np is None:
+            import numpy as np_module
+
+            self.np = np_module
+
+        vector = self.np.zeros(self.embedding_dim, dtype=self.np.float32)
         tokens = text.lower().split()
         if not tokens:
             tokens = [""]
@@ -171,7 +180,7 @@ class RetrieverService:
             idx = int.from_bytes(digest[:4], "little") % self.embedding_dim
             vector[idx] += 1.0
 
-        norm = np.linalg.norm(vector)
+        norm = self.np.linalg.norm(vector)
         if norm > 0:
             vector = vector / norm
         return vector.reshape(1, -1)
@@ -188,7 +197,12 @@ class RetrieverService:
         """
         if self.embedding_model is not None:
             embedding = self.embedding_model.encode(query, convert_to_numpy=True)
-            norm = np.linalg.norm(embedding)
+            if self.np is None:
+                import numpy as np_module
+
+                self.np = np_module
+
+            norm = self.np.linalg.norm(embedding)
             if norm > 0:
                 embedding = embedding / norm
             return embedding.reshape(1, -1)
@@ -256,85 +270,6 @@ class RetrieverService:
             results.append(chunk_data)
         
         return results, search_time_ms
-    
-    def add_chunks(self, chunks: List[Dict]) -> Dict:
-        """
-        Add new chunks to the FAISS index.
-        
-        Args:
-            chunks: List of chunk dictionaries with at least 'text' field and optional metadata
-                    Expected keys: text, chunk_id, doc_id, source_file, approval_status
-            
-        Returns:
-            Dictionary with status and number of chunks added
-        """
-        if not chunks:
-            return {"status": "success", "chunks_added": 0, "message": "No chunks to add"}
-        
-        try:
-            added_count = 0
-            start_idx = self.index.ntotal
-            
-            # Encode all chunk texts
-            chunk_texts = [chunk.get("text", "") for chunk in chunks]
-            chunk_embeddings = []
-            
-            for text in chunk_texts:
-                if text.strip():
-                    # Encode using embedding model or fallback
-                    if self.embedding_model is not None:
-                        embedding = self.embedding_model.encode(text, convert_to_numpy=True)
-                    else:
-                        embedding = self._hash_encode(text)[0]
-                    
-                    # Normalize for cosine similarity
-                    norm = np.linalg.norm(embedding)
-                    if norm > 0:
-                        embedding = embedding / norm
-                    
-                    chunk_embeddings.append(embedding.reshape(1, -1))
-            
-            # Add embeddings to FAISS index
-            if chunk_embeddings:
-                embeddings_array = np.vstack(chunk_embeddings).astype(np.float32)
-                self.index.add(embeddings_array)
-                
-                # Store metadata for each chunk
-                for i, chunk in enumerate(chunks):
-                    faiss_idx = start_idx + i
-                    chunk_id = chunk.get("chunk_id", f"chunk-{faiss_idx}")
-                    doc_id = chunk.get("doc_id", f"doc-unknown")
-                    chunk_text = chunk.get("text", "")
-                    source_file = chunk.get("source_file", "unknown")
-                    approval_status = chunk.get("approval_status", "pending")
-                    
-                    self.store_chunk_metadata(
-                        faiss_idx=faiss_idx,
-                        chunk_id=chunk_id,
-                        doc_id=doc_id,
-                        chunk_text=chunk_text,
-                        source_file=source_file,
-                        approval_status=approval_status
-                    )
-                    added_count += 1
-                
-                # Save updated FAISS index to disk
-                faiss.write_index(self.index, str(self.index_path))
-                
-                return {
-                    "status": "success",
-                    "chunks_added": added_count,
-                    "message": f"Added {added_count} chunks to FAISS index"
-                }
-            
-            return {"status": "success", "chunks_added": 0, "message": "No valid chunks to add"}
-        
-        except Exception as e:
-            return {
-                "status": "error",
-                "chunks_added": 0,
-                "message": f"Failed to add chunks: {str(e)}"
-            }
     
     def batch_retrieve(
         self,
