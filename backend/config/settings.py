@@ -31,7 +31,12 @@ class Settings:
     # CORS
     cors_origins: List[str] = _csv_env(
         "CORS_ORIGINS",
-        ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
+        [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "https://secure-answer.vercel.app",
+        ],
     )
 
     # Request limits
