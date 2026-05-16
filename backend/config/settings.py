@@ -36,6 +36,8 @@ class Settings:
             "http://127.0.0.1:5173",
             "http://localhost:3000",
             "https://secure-answer.vercel.app",
+            "https://secure-answer-47bfks0zk-shriyanshs-projects-6d2f0600.vercel.app",
+            "https://secure-answer-shriyanshs-projects-6d2f0600.vercel.app",
         ],
     )
 
