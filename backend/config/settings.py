@@ -16,6 +16,17 @@ def _csv_env(name: str, default: list[str]) -> list[str]:
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
+def _merged_csv_env(name: str, default: list[str]) -> list[str]:
+    values = _csv_env(name, [])
+    merged: list[str] = []
+
+    for origin in [*default, *values]:
+        if origin not in merged:
+            merged.append(origin)
+
+    return merged
+
+
 class Settings:
     """Application settings."""
 
@@ -29,7 +40,7 @@ class Settings:
     port: int = int(os.getenv("PORT", 8000))
 
     # CORS
-    cors_origins: List[str] = _csv_env(
+    cors_origins: List[str] = _merged_csv_env(
         "CORS_ORIGINS",
         [
             "http://localhost:5173",
