@@ -2,8 +2,6 @@
 Retrieval Service - Vector search with FAISS (no Supabase vectors)
 """
 
-from __future__ import annotations
-
 import os
 import json
 import time
@@ -12,6 +10,7 @@ import sqlite3
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 import sys
+import numpy as np
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -42,7 +41,7 @@ class RetrieverService:
         self.metadata_db = self.data_dir / "kb_metadata.sqlite"
 
         self.faiss = None
-        self.np = None
+        self.np = np
         self.sentence_transformers = None
         
         # Initialize embedding model (local-first, deterministic fallback)
@@ -165,7 +164,7 @@ class RetrieverService:
             self.embedding_model = None
             self.embedding_dim = 384
 
-    def _hash_encode(self, text: str) -> np.ndarray:
+    def _hash_encode(self, text: str) -> "np.ndarray":
         """Deterministic local embedding fallback used when no transformer model is available."""
         if self.np is None:
             import numpy as np_module
@@ -187,7 +186,7 @@ class RetrieverService:
             vector = vector / norm
         return vector.reshape(1, -1)
     
-    def encode_query(self, query: str) -> np.ndarray:
+    def encode_query(self, query: str) -> "np.ndarray":
         """
         Encode query to embedding vector.
         

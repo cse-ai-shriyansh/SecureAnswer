@@ -105,11 +105,6 @@ class DocumentIngestionService:
                 source=source
             )
             
-            # Add chunks to FAISS index if retriever is available
-            if self.retriever and processed_chunks:
-                add_result = self.retriever.add_chunks(processed_chunks)
-                print(f"FAISS index update: {add_result['message']}")
-            
             self.processed_docs += 1
             
             return {

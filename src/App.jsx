@@ -16,12 +16,13 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   const enableDevLogin = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
+  const enableTestLogin = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === 'true'
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
   const routes = []
 
   // Only expose the login route when Google OAuth is configured or dev/test login is enabled
-  if (googleClientId || enableDevLogin) {
+  if (googleClientId || enableDevLogin || enableTestLogin) {
     routes.push({ path: '/login', element: <Login /> })
   }
 

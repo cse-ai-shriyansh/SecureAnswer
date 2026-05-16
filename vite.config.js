@@ -6,6 +6,14 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
+  },
+  preview: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
   },
   build: {
     // Increase chunk size warning limit to reduce noisy warnings for large bundles.

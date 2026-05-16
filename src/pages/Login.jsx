@@ -2,20 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import Card from '../components/Card'
-import { login, loginWithGoogle, testLogin } from '../lib/auth'
+import { loginWithGoogle } from '../lib/auth'
 import { getSession } from '../lib/auth'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [googleReady, setGoogleReady] = useState(false)
   const googleButtonRef = useRef(null)
   const nav = useNavigate()
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-  const enableDevLogin = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
-  const enableTestLogin = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === 'true'
 
   // If user already has a session, redirect to dashboard.
   useEffect(() => {
@@ -29,6 +25,10 @@ export default function Login() {
     const existingScript = document.querySelector('script[data-google-identity]')
     const initGoogle = () => {
       if (!window.google?.accounts?.id || !googleButtonRef.current) return
+
+      // Prevent multiple initialize() calls across React remounts
+      if (window.__gsi_secureanswer_initialized) return
+      window.__gsi_secureanswer_initialized = true
 
       window.google.accounts.id.initialize({
         client_id: googleClientId,
@@ -77,33 +77,6 @@ export default function Login() {
     return undefined
   }, [googleClientId, nav])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-    try {
-      await login({ email, password })
-      nav('/')
-    } catch (e) {
-      setError(e.message || 'Login failed')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleTestLogin = async () => {
-    setError(null)
-    setLoading(true)
-    try {
-      await testLogin()
-      nav('/')
-    } catch (e) {
-      setError(e.message || 'Test login failed')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-transparent">
       <Card className="w-full max-w-md space-y-6">
@@ -124,28 +97,7 @@ export default function Login() {
           </div>
         )}
 
-        {enableDevLogin && (
-          <form onSubmit={handleSubmit} className="space-y-4 pt-2 border-t border-border">
-            <p className="text-xs uppercase tracking-[0.2em] text-text-secondary">Dev fallback</p>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="input-base w-full" />
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" className="input-base w-full" />
-            {error && <div className="text-sm text-danger">{error}</div>}
-            <div className="flex items-center gap-3">
-              <Button type="submit" variant="primary" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</Button>
-            </div>
-          </form>
-        )}
-
-        {!enableDevLogin && error && <div className="text-sm text-danger">{error}</div>}
-
-        {enableTestLogin && (
-          <div className="pt-2 border-t border-border">
-            <p className="text-xs uppercase tracking-[0.2em] text-text-secondary mb-3">Testing access</p>
-            <Button type="button" variant="secondary" disabled={loading} onClick={handleTestLogin}>
-              {loading ? 'Signing in…' : 'Continue as test user'}
-            </Button>
-          </div>
-        )}
+        {error && <div className="text-sm text-danger">{error}</div>}
       </Card>
     </div>
   )
