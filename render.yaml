@@ -9,7 +9,7 @@ services:
       - key: APP_ENV
         value: "production"
       - key: CORS_ORIGINS
-        value: "https://your-frontend.vercel.app"
+        value: "https://secure-answer.vercel.app,https://secure-answer-47bfks0zk-shriyanshs-projects-6d2f0600.vercel.app,https://secure-answer-shriyanshs-projects-6d2f0600.vercel.app"
       - key: SUPABASE_URL
         value: ""
       - key: SUPABASE_SERVICE_ROLE_KEY
