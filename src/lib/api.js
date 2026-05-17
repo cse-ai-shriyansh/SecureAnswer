@@ -1,7 +1,11 @@
 import axios from 'axios'
 
-// Get backend URL from environment or use default
-const backendURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const envBackendURL = (import.meta.env.VITE_API_BASE_URL || '').trim()
+const backendURL = envBackendURL || (import.meta.env.DEV ? 'http://localhost:8000' : '')
+
+if (!backendURL) {
+  console.error('VITE_API_BASE_URL is missing. Set it in your frontend deployment environment to your backend URL.')
+}
 
 const api = axios.create({
   baseURL: backendURL,
@@ -15,6 +19,9 @@ import { getToken } from './auth'
 
 // Attach bearer token automatically if present
 api.interceptors.request.use((config) => {
+  if (!backendURL) {
+    return Promise.reject(new Error('VITE_API_BASE_URL is not configured for production'))
+  }
   try {
     const token = getToken()
     if (token) {
