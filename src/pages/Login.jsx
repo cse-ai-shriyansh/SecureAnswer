@@ -16,7 +16,7 @@ export default function Login() {
   // If user already has a session, redirect to dashboard.
   useEffect(() => {
     const session = getSession()
-    if (session) nav('/', { replace: true })
+    if (session) window.location.replace('/')
   }, [nav])
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function Login() {
           setLoading(true)
           try {
             await loginWithGoogle(response.credential)
-            nav('/')
+            window.location.replace('/')
           } catch (err) {
             setError(err.message || 'Google sign-in failed')
           } finally {
